@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiCheckCircle, FiCircle, FiTrash2, FiAlertCircle } from 'react-icons/fi'; // Adicionar FiAlertCircle
 
 const TaskList = ({ token }) => {
     const [tasks, setTasks] = useState([]);
@@ -67,35 +69,65 @@ const TaskList = ({ token }) => {
     };
 
     return (
-        <div>
-            <h2>Minhas Tarefas</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleAddTask}>
-                <input
-                    type="text"
-                    value={newTask}
-                    onChange={(e) => setNewTask(e.target.value)}
-                    placeholder="Nova tarefa..."
-                    required
-                />
-                <button type="submit">Adicionar</button>
-            </form>
-            <ul>
-                {tasks.map((task) => (
-                    <li key={task._id}>
-                        <span
-                            style={{
-                                textDecoration: task.completed ? 'line-through' : 'none',
-                                cursor: 'pointer',
-                            }}
-                            onClick={() => handleToggleComplete(task._id)}
+        <div className="task-list container">
+            <div className="card">
+                <h1 className="task-list__title">Minhas Tarefas</h1>
+
+                {error && (
+                    <div className="alert alert--error">
+                        <FiAlertCircle className="alert__icon" />
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleAddTask} className="task-form">
+                    <input
+                        type="text"
+                        value={newTask}
+                        onChange={(e) => setNewTask(e.target.value)}
+                        placeholder="Adicione uma nova tarefa..."
+                        className="input input--block"
+                        required
+                    />
+                    <button type="submit" className="button button--primary">
+                        Adicionar
+                    </button>
+                </form>
+
+                <AnimatePresence>
+                    {tasks.map((task) => (
+                        <motion.div
+                            key={task._id}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="task-item"
                         >
-                            {task.description}
-                        </span>
-                        <button onClick={() => handleDeleteTask(task._id)}>Remover</button>
-                    </li>
-                ))}
-            </ul>
+                            <button
+                                onClick={() => handleToggleComplete(task._id)}
+                                className="task-item__status"
+                            >
+                                {task.completed ? (
+                                    <FiCheckCircle className="task-item__icon--completed" />
+                                ) : (
+                                    <FiCircle className="task-item__icon" />
+                                )}
+                            </button>
+
+                            <span className={`task-item__text ${task.completed ? 'task-item__text--completed' : ''}`}>
+                                {task.description}
+                            </span>
+
+                            <button
+                                onClick={() => handleDeleteTask(task._id)}
+                                className="task-item__delete"
+                            >
+                                <FiTrash2 />
+                            </button>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+            </div>
         </div>
     );
 };
